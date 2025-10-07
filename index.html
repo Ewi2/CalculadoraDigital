@@ -1,1 +1,219 @@
 <!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Indemnización por Despido</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-6">
+  <div class="flex flex-col md:flex-row gap-6 w-full max-w-5xl">
+
+    <!-- Contenedor izquierdo: Calculadora -->
+    <div class="bg-white shadow-2xl rounded-2xl p-8 w-full md:w-1/2">
+      <h1 class="text-2xl font-bold text-center text-green-700 mb-6">Calculadora de Indemnización</h1>
+
+      <!-- Selector de modo -->
+      <div class="mb-4 text-center">
+        <label class="mr-2 font-semibold">Modo de ingreso:</label>
+        <select id="modo" class="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-500" onchange="cambiarModo()">
+          <option value="manual">Manual (Años / Meses / Días)</option>
+          <option value="fechas">Por fechas (Inicio y Despido)</option>
+        </select>
+      </div>
+
+      <!-- Modo manual -->
+      <div id="modoManual">
+        <label class="block font-semibold mb-1">Salario mensual (USD):</label>
+        <input id="salario" type="number" min="1" placeholder="Ej: 600" class="w-full border border-gray-300 rounded-xl p-2 mb-1 focus:outline-none">
+        <small id="errorSalario" class="hidden text-red-600 text-sm mb-3 block">El salario es requerido y debe ser mayor o igual a $408.80</small>
+
+        <label class="block font-semibold mb-1">Años completos trabajados:</label>
+        <input id="anios" type="number" min="0" placeholder="Ej: 6" class="w-full border border-gray-300 rounded-xl p-2 mb-1 focus:outline-none">
+        <small id="errorAnios" class="hidden text-red-600 text-sm mb-3 block">El valor debe ser un número entre 0 y 100, o ingrese al menos un periodo trabajado.</small>
+
+        <label class="block font-semibold mb-1">Meses adicionales trabajados:</label>
+        <input id="meses" type="number" min="0" max="11" placeholder="Ej: 9" class="w-full border border-gray-300 rounded-xl p-2 mb-1 focus:outline-none">
+        <small id="errorMeses" class="hidden text-red-600 text-sm mb-3 block">El valor debe estar entre 0 y 11 meses.</small>
+
+        <label class="block font-semibold mb-1">Días adicionales trabajados:</label>
+        <input id="dias" type="number" min="0" max="29" placeholder="Ej: 15" class="w-full border border-gray-300 rounded-xl p-2 mb-4 focus:outline-none">
+        <small id="errorDias" class="hidden text-red-600 text-sm mb-3 block">El valor debe estar entre 0 y 29 días.</small>
+      </div>
+
+      <!-- Modo fechas -->
+      <div id="modoFechas" class="hidden">
+        <label class="block font-semibold mb-1">Salario mensual (USD):</label>
+        <input id="salarioFechas" type="number" min="1" placeholder="Ej: 600" class="w-full border border-gray-300 rounded-xl p-2 mb-1 focus:outline-none">
+        <small id="errorSalarioFechas" class="hidden text-red-600 text-sm mb-3 block">El salario es requerido y debe ser mayor o igual a $408.80</small>
+
+        <label class="block font-semibold mb-1">Fecha de inicio:</label>
+        <input id="fechaInicio" type="date" class="w-full border border-gray-300 rounded-xl p-2 mb-1 focus:outline-none">
+        <small id="errorFechaInicio" class="hidden text-red-600 text-sm mb-3 block">La fecha de inicio es requerida.</small>
+
+        <label class="block font-semibold mb-1">Fecha de despido:</label>
+        <input id="fechaFin" type="date" class="w-full border border-gray-300 rounded-xl p-2 mb-1 focus:outline-none">
+        <small id="errorFechaFin" class="hidden text-red-600 text-sm mb-3 block">La fecha de despido es requerida y debe ser posterior a la de inicio.</small>
+      </div>
+
+      <button onclick="calcularIndemnizacion()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-xl transition">Calcular</button>
+
+      <div id="resultado" class="hidden mt-6 p-4 bg-green-50 border-l-4 border-green-600 rounded-xl">
+        <p class="text-lg font-semibold">Resultado:</p>
+        <p id="monto" class="text-2xl font-bold text-green-700 mt-2"></p>
+        <p id="resumenTiempo" class="text-sm text-gray-700 mt-2"></p>
+        <div class="mt-3 text-sm text-gray-700">
+          <p><strong>Fórmula aplicada:</strong></p>
+          <p>Indemnización = (Salario mensual × Años) + (Salario mensual × (Meses / 12)) + (Salario mensual × (Días / 360))</p>
+          <p>Se usa año comercial de 360 días y mes de 30 días para cálculo proporcional.</p>
+        </div>
+        <div class="mt-3 text-xs text-gray-600 border-t pt-2">
+          <p><strong>Base legal:</strong> Art. 58 y ss. del Código de Trabajo de El Salvador. La indemnización por despido injustificado equivale a 30 días de salario por cada año de servicio, proporcional a los meses y días trabajados, sin ser inferior a 15 días de salario.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenedor derecho: Base legal -->
+    <div class="bg-white shadow-2xl rounded-2xl p-8 w-full md:w-1/2">
+      <h2 class="text-xl font-bold text-green-700 mb-4">Base Legal y Explicación</h2>
+      <p class="text-gray-700 mb-3">La <strong>indemnización por despido injustificado</strong> está regulada principalmente en el <strong>artículo 58</strong> y siguientes del Código de Trabajo de El Salvador. Esta establece que el trabajador despedido sin causa justa tiene derecho a recibir una compensación equivalente a 30 días de salario básico por cada año de servicio continuo.</p>
+      <p class="text-gray-700 mb-3">Si el tiempo de servicio no completa un año, se calculará la parte proporcional según los meses y días trabajados. Además, la indemnización no podrá ser menor al equivalente de 15 días de salario.</p>
+      <p class="text-gray-700 mb-3">Para efectos de cálculo, se considera un año comercial de 360 días y un mes de 30 días, lo cual facilita la determinación de la prestación. El salario base utilizado no puede exceder cuatro veces el salario mínimo vigente del sector económico correspondiente.</p>
+      <p class="text-gray-700">Estas disposiciones buscan garantizar la estabilidad económica del trabajador ante un despido arbitrario y fomentar prácticas empresariales responsables.</p>
+    </div>
+  </div>
+
+  <script>
+    function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+    function clearErrors(){
+      const ids = ['salario','anios','meses','dias','salarioFechas','fechaInicio','fechaFin'];
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.classList.remove('border-red-500');
+        const err = document.getElementById('error'+capitalize(id));
+        if(err) err.classList.add('hidden');
+      });
+    }
+
+    function cambiarModo(){
+      clearErrors();
+      document.getElementById('resultado').classList.add('hidden');
+      const modo = document.getElementById('modo').value;
+      document.getElementById('modoManual').classList.toggle('hidden', modo !== 'manual');
+      document.getElementById('modoFechas').classList.toggle('hidden', modo !== 'fechas');
+    }
+
+    function markError(id, message){
+      const el = document.getElementById(id);
+      const err = document.getElementById('error'+capitalize(id));
+      if(el) el.classList.add('border-red-500');
+      if(err){ err.textContent = message; err.classList.remove('hidden'); }
+    }
+
+    function calcularIndemnizacion(){
+      clearErrors();
+      document.getElementById('resultado').classList.add('hidden');
+
+      const modo = document.getElementById('modo').value;
+      let salario = 0, anios = 0, meses = 0, dias = 0;
+      let valido = true;
+
+      if(modo === 'manual'){
+        const salarioRaw = document.getElementById('salario').value.trim();
+        const aniosRaw = document.getElementById('anios').value.trim();
+        const mesesRaw = document.getElementById('meses').value.trim();
+        const diasRaw = document.getElementById('dias').value.trim();
+
+        if(salarioRaw === ''){
+          markError('salario','El salario es requerido y debe ser mayor o igual a $408.80');
+          valido = false;
+        } else {
+          salario = parseFloat(salarioRaw);
+          if(isNaN(salario) || salario < 408.80){
+            markError('salario','El salario debe ser un número y mayor o igual a $408.80');
+            valido = false;
+          }
+        }
+
+        // Check if user provided any period data at all
+        if(aniosRaw === '' && mesesRaw === '' && diasRaw === ''){
+          markError('anios','Ingrese al menos años, meses o días trabajados.');
+          valido = false;
+        } else {
+          anios = aniosRaw === '' ? 0 : parseInt(aniosRaw);
+          meses = mesesRaw === '' ? 0 : parseInt(mesesRaw);
+          dias = diasRaw === '' ? 0 : parseInt(diasRaw);
+
+          if(isNaN(anios) || anios < 0 || anios > 100){
+            markError('anios','El valor debe ser un número entre 0 y 100.');
+            valido = false;
+          }
+          if(isNaN(meses) || meses < 0 || meses > 11){
+            markError('meses','El valor debe estar entre 0 y 11.');
+            valido = false;
+          }
+          if(isNaN(dias) || dias < 0 || dias > 29){
+            markError('dias','El valor debe estar entre 0 y 29.');
+            valido = false;
+          }
+        }
+
+        if(!valido) return;
+
+      } else {
+        // modo fechas
+        const salarioRaw = document.getElementById('salarioFechas').value.trim();
+        const fechaInicioRaw = document.getElementById('fechaInicio').value;
+        const fechaFinRaw = document.getElementById('fechaFin').value;
+
+        if(salarioRaw === ''){
+          markError('salarioFechas','El salario es requerido y debe ser mayor o igual a $408.80');
+          valido = false;
+        } else {
+          salario = parseFloat(salarioRaw);
+          if(isNaN(salario) || salario < 408.80){
+            markError('salarioFechas','El salario debe ser un número y mayor o igual a $408.80');
+            valido = false;
+          }
+        }
+
+        if(!fechaInicioRaw){
+          markError('fechaInicio','La fecha de inicio es requerida.');
+          valido = false;
+        }
+        if(!fechaFinRaw){
+          markError('fechaFin','La fecha de despido es requerida.');
+          valido = false;
+        }
+        if(!valido) return;
+
+        const fechaInicio = new Date(fechaInicioRaw + 'T00:00:00');
+        const fechaFin = new Date(fechaFinRaw + 'T00:00:00');
+        if(fechaFin <= fechaInicio){
+          markError('fechaFin','La fecha de despido debe ser posterior a la fecha de inicio.');
+          return;
+        }
+
+        const diffMs = fechaFin - fechaInicio;
+        const diasTotales = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        anios = Math.floor(diasTotales / 360);
+        meses = Math.floor((diasTotales % 360) / 30);
+        dias = Math.floor((diasTotales % 360) % 30);
+      }
+
+      // Cálculo proporcional claro y sencillo
+      const indemnizacionAnios = salario * anios;
+      const indemnizacionMeses = salario * (meses / 12);
+      const indemnizacionDias = salario * (dias / 360);
+      let total = indemnizacionAnios + indemnizacionMeses + indemnizacionDias;
+
+      const minimo = salario * (15/30); // 15 días = 0.5*salario mensual
+      if(total < minimo) total = minimo;
+
+      document.getElementById('resultado').classList.remove('hidden');
+      document.getElementById('monto').textContent = `$${total.toFixed(2)} USD`;
+      document.getElementById('resumenTiempo').textContent = `Tiempo total trabajado: ${anios} años, ${meses} meses y ${dias} días.`;
+    }
+  </script>
+</body>
+</html>
