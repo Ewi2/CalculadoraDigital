@@ -6,8 +6,8 @@
   <title>Calculadora de Indemnización por Despido</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-6">
-  <div class="flex flex-col md:flex-row gap-6 w-full max-w-5xl">
+<body class="bg-gray-100 min-h-screen flex flex-col justify-between p-6">
+  <main class="flex flex-col md:flex-row gap-6 w-full max-w-5xl mx-auto">
 
     <!-- Contenedor izquierdo: Calculadora -->
     <div class="bg-white shadow-2xl rounded-2xl p-8 w-full md:w-1/2">
@@ -81,7 +81,14 @@
       <p class="text-gray-700 mb-3">Para efectos de cálculo, se considera un año comercial de 360 días y un mes de 30 días, lo cual facilita la determinación de la prestación. El salario base utilizado no puede exceder cuatro veces el salario mínimo vigente del sector económico correspondiente.</p>
       <p class="text-gray-700">Estas disposiciones buscan garantizar la estabilidad económica del trabajador ante un despido arbitrario y fomentar prácticas empresariales responsables.</p>
     </div>
-  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="text-center text-gray-700 text-sm mt-8 border-t pt-4">
+    <p>Integrantes del proyecto:</p>
+    <p><strong>Edwin René González Bonilla</strong> - SMSS086022</p>
+    <p><strong>Emmanuel Heriberto Martínez Avilés</strong> - SMSS164422</p>
+  </footer>
 
   <script>
     function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
@@ -135,7 +142,6 @@
           }
         }
 
-        // Check if user provided any period data at all
         if(aniosRaw === '' && mesesRaw === '' && diasRaw === ''){
           markError('anios','Ingrese al menos años, meses o días trabajados.');
           valido = false;
@@ -161,7 +167,6 @@
         if(!valido) return;
 
       } else {
-        // modo fechas
         const salarioRaw = document.getElementById('salarioFechas').value.trim();
         const fechaInicioRaw = document.getElementById('fechaInicio').value;
         const fechaFinRaw = document.getElementById('fechaFin').value;
@@ -201,13 +206,12 @@
         dias = Math.floor((diasTotales % 360) % 30);
       }
 
-      // Cálculo proporcional claro y sencillo
       const indemnizacionAnios = salario * anios;
       const indemnizacionMeses = salario * (meses / 12);
       const indemnizacionDias = salario * (dias / 360);
       let total = indemnizacionAnios + indemnizacionMeses + indemnizacionDias;
 
-      const minimo = salario * (15/30); // 15 días = 0.5*salario mensual
+      const minimo = salario * (15 / 30);
       if(total < minimo) total = minimo;
 
       document.getElementById('resultado').classList.remove('hidden');
