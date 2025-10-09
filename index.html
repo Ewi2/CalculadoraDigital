@@ -4,11 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Calculadora de Indemnización por Despido</title>
+  <link rel="icon" type="image/x-icon" href="/Isotipo-blanco.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @font-face { font-family: 'HelveticaLTPro'; src: url('/HelveticaLTPro-Roman.otf') format('opentype');
+    @font-face { font-family: 'HelveticaLTPro'; src: url('HelveticaLTPro-Roman.otf') format('opentype');
     font-weight: 400; font-style: normal;}
-    @font-face { font-family: 'HelveticaLTPro'; src: url('/HelveticaLTPro-Bold.otf') format('opentype');
+    @font-face { font-family: 'HelveticaLTPro'; src: url('HelveticaLTPro-Bold.otf') format('opentype');
     font-weight: 700; font-style: normal;}
     body {
       -webkit-font-smoothing: auto;
@@ -37,7 +38,7 @@
 
       <div id="modoManual">
         <label class="block font-semibold mb-1">Salario mensual (USD):</label>
-        <input id="salario" type="number" min="1" placeholder="Ej: 600" class="w-full border border-gray-300 rounded-xl p-2 mb-1 focus:outline-none">
+        <input id="salario" type="number" min="408.80" placeholder="Ej: 600" class="w-full border border-gray-300 rounded-xl p-2 mb-1 focus:outline-none">
         <small id="errorSalario" class="hidden text-red-600 text-sm mb-3 block">El salario es requerido y debe ser mayor o igual a $408.80</small>
 
         <label class="block font-semibold mb-1">Años completos trabajados:</label>
@@ -55,7 +56,7 @@
 
       <div id="modoFechas" class="hidden">
         <label class="block font-semibold mb-1">Salario mensual (USD):</label>
-        <input id="salarioFechas" type="number" min="1" placeholder="Ej: 600" class="w-full border border-gray-300 rounded-xl p-2 mb-1 focus:outline-none">
+        <input id="salarioFechas" type="number" min="408.80" placeholder="Ej: 600" class="w-full border border-gray-300 rounded-xl p-2 mb-1 focus:outline-none">
         <small id="errorSalarioFechas" class="hidden text-red-600 text-sm mb-3 block">El salario es requerido y debe ser mayor o igual a $408.80</small>
 
         <label class="block font-semibold mb-1">Fecha de inicio:</label>
@@ -63,25 +64,25 @@
         <small id="errorFechaInicio" class="hidden text-red-600 text-sm mb-3 block">La fecha de inicio es requerida.</small>
 
         <label class="block font-semibold mb-1">Fecha de despido:</label>
-        <input id="fechaFin" type="date" class="w-full border border-gray-300 rounded-xl p-2 mb-1 focus:outline-none">
+        <input id="fechaFin" type="date" class="w-full border border-gray-300 rounded-xl p-2 mb-4 focus:outline-none">
         <small id="errorFechaFin" class="hidden text-red-600 text-sm mb-3 block">La fecha de despido es requerida y debe ser posterior a la de inicio.</small>
       </div>
 
-      <button onclick="calcularIndemnizacion()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-xl transition">Calcular</button>
+      <button onclick="calcularIndemnizacion()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-xl transition delay-50 duration-100 ease-in-out hover:scale-105">Calcular</button>
 
-      <div id="resultado" class="hidden mt-6 p-4 bg-green-50 border-l-4 border-green-600 rounded-xl">
-        <p class="text-lg font-semibold">Resultado:</p>
-        <p id="monto" class="text-2xl font-bold text-green-700 mt-2"></p>
-        <p id="resumenTiempo" class="text-sm text-gray-700 mt-2"></p>
-        <div class="mt-3 text-sm text-gray-700">
-          <p><strong>Fórmula aplicada:</strong></p>
-          <p>Indemnización = (Salario mensual × Años) + (Salario mensual × (Meses / 12)) + (Salario mensual × (Días / 360))</p>
-          <p>Se usa año comercial de 360 días y mes de 30 días para cálculo proporcional.</p>
-        </div>
-        <div class="mt-3 text-xs text-gray-600 border-t pt-2">
-          <p><strong>Base legal:</strong> Art. 58 y ss. del Código de Trabajo de El Salvador. La indemnización por despido injustificado equivale a 30 días de salario por cada año de servicio, proporcional a los meses y días trabajados, sin ser inferior a 15 días de salario.</p>
-        </div>
-      </div>
+<div id="resultado" class="opacity-0 scale-95 mt-6 p-4 bg-green-50 border-l-4 border-green-600 rounded-xl transition-all duration-500 ease-out transform hidden">
+  <p class="text-lg font-semibold">Resultado:</p>
+  <p id="monto" class="text-2xl font-bold text-green-700 mt-2"></p>
+  <p id="resumenTiempo" class="text-sm text-gray-700 mt-2"></p>
+  <div class="mt-3 text-sm text-gray-700">
+    <p><strong>Fórmula aplicada:</strong></p>
+    <p>Indemnización = (Salario mensual × Años) + (Salario mensual × (Meses / 12)) + (Salario mensual × (Días / 360))</p>
+    <p>Se usa año comercial de 360 días y mes de 30 días para cálculo proporcional.</p>
+  </div>
+  <div class="mt-3 text-xs text-gray-600 border-t pt-2">
+    <p><strong>Base legal:</strong> Art. 58 y otros del Código de Trabajo de El Salvador</p>
+  </div>
+</div>
     </div>
 
     <div class="bg-white text-justify shadow-2xl rounded-2xl p-8 w-full md:w-1/2">
@@ -223,7 +224,12 @@
       const minimo = salario * (15 / 30);
       if(total < minimo) total = minimo;
 
-      document.getElementById('resultado').classList.remove('hidden');
+    const resultadoDiv = document.getElementById('resultado');
+    resultadoDiv.classList.remove('hidden');
+    setTimeout(() => {
+      resultadoDiv.classList.remove('opacity-0', 'scale-95');
+      resultadoDiv.classList.add('opacity-100', 'scale-100');
+    }, 10);
       document.getElementById('monto').textContent = `$${total.toFixed(2)} USD`;
       document.getElementById('resumenTiempo').textContent = `Tiempo total trabajado: ${anios} años, ${meses} mes(es) y ${dias} días.`;
     }
